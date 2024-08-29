@@ -3,6 +3,7 @@ from pxr import Usd
 from pxr import UsdGeom
 
 from omni.ui import scene as sc
+from .object_info_manipulator import ObjInfoManipulator
 import omni.usd
 
 
@@ -21,7 +22,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
             self.value = [0, 0, 0]
 
 
-    def __init__(self) -> None:
+    def __init__(self, manipulator) -> None:
         super().__init__()
 
         self.prim = None
@@ -35,26 +36,39 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         self.stage_event_delegate = self.events.create_subscription_to_pop(
             self.on_stage_event, name="Object Info Selection Update"
         )
+        self.manipulator = manipulator
 
     def on_stage_event(self, event):
         if event.type == int(omni.usd.StageEventType.SELECTION_CHANGED):
 
-            prim_path = self.usd_context.get_selection().get_selected_prim_paths()
+            prim_paths = self.usd_context.get_selection().get_selected_prim_paths()
             
-            if not prim_path:
+            if not prim_paths:
                 self.current_path = ""
                 self._item_changed(self.position)
                 return
             
+           
+            
             stage = self.usd_context.get_stage()
-            prim = stage.GetPrimAtPath(prim_path[0])
+            # prim = stage.GetPrimAtPath(prim_path[0])
 
-            if not prim.IsA(UsdGeom.Imageable):
-                self.prim = None
-                if self.stage_listener:
-                    self.stage_listener.Revoke()
-                    self.stage_listener = None
-                return
+            # if not prim.IsA(UsdGeom.Imageable):
+            #     self.prim = None
+            #     if self.stage_listener:
+            #         self.stage_listener.Revoke()
+            #         self.stage_listener = None
+            #     return
+
+            for prim_path in prim_paths:
+                prim = stage.GetPrimAtPath(prim_path)
+                
+                if not prim.IsA(UsdGeom.Imageable):
+                    continue
+            
+            
+            if self.manipulator:
+                self.manipulator.add_selected_prim(prim_path)
 
             if not self.stage_listener:
                 self.stage_listener = Tf.Notice.Register(Usd.Notice.ObjectsChanged, self.notice_changed, stage)
@@ -80,7 +94,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         prim = stage.GetPrimAtPath(self.current_path)
         return self.get_position_for_prim(prim)
 
-    # New method to get position for any given prim
     def get_position_for_prim(self, prim):
         """Returns position of the given prim"""
         stage = self.usd_context.get_stage()

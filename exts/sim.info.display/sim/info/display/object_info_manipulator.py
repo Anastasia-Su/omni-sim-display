@@ -4,6 +4,9 @@ from pxr import UsdGeom
 
 
 class ObjInfoManipulator(sc.Manipulator):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.selected_prims = []
 
     def on_build(self):
 
@@ -19,28 +22,32 @@ class ObjInfoManipulator(sc.Manipulator):
             return
         
         for prim in stage.Traverse():
-            if prim.IsA(UsdGeom.Imageable) and not prim.GetPath().pathString in (
-                '/World', '/Environment/ground', '/Environment'
-            ):
-                # Get the position of the current prim
-                position = self.model.get_position_for_prim(prim)
+            prim_path = str(prim.GetPath())
 
 
-                with ui.Style(
-            {
-                "Label": {"font_size": 20}  # Set font size for Label
-            }
-        ):
-                # Create a label for each prim
-                    with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
-                        with sc.Transform(scale_to=sc.Space.SCREEN):
-                            sc.Label(f"Path: {prim.GetPath().pathString}")
+            # if prim.IsA(UsdGeom.Imageable) and not prim.GetPath().pathString in (
+            #     '/World', '/Environment/ground', '/Environment'
+            # ):
+            if prim_path not in self.selected_prims:
+                continue
+            position = self.model.get_position_for_prim(prim)
+
+
+            with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
+                with sc.Transform(scale_to=sc.Space.SCREEN):
+                    sc.Label(f"Path: {prim.GetPath().pathString}")
 
         # position = self.model.get_as_floats(self.model.get_item("position"))
 
         # with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
         #     with sc.Transform(scale_to=sc.Space.SCREEN):
         #         sc.Label(f"Path: {self.model.get_item('name')}")
+
+    def add_selected_prim(self, prim_path):
+        """Adds a prim path to the list of selected prims."""
+        if prim_path not in self.selected_prims:
+            self.selected_prims.append(prim_path)
+            # self.invalidate()  
 
 
     def on_model_updated(self, item):
