@@ -71,37 +71,42 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         
         elif identifier == "position":
             return self.position
-        
-    def get_as_floats(self, item):
-        if item == self.position:
-            # Requesting position
-            return self.get_position()
-        if item:
-            # Get the value directly from the item
-            return item.value
 
-        return []
-
-    # defines the position based on the bounding box of the prim
     def get_position(self):
         stage = self.usd_context.get_stage()
         if not stage or self.current_path == "":
             return [0, 0, 0]
 
-        # Get position directly from USD
         prim = stage.GetPrimAtPath(self.current_path)
+        return self.get_position_for_prim(prim)
+
+    # New method to get position for any given prim
+    def get_position_for_prim(self, prim):
+        """Returns position of the given prim"""
+        stage = self.usd_context.get_stage()
+        if not stage or not prim:
+            return [0, 0, 0]
+
         box_cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), includedPurposes=[UsdGeom.Tokens.default_])
         bound = box_cache.ComputeWorldBound(prim)
         range = bound.ComputeAlignedBox()
-        bboxMin = range.GetMin() #bbox stands for bounding box
+        bboxMin = range.GetMin()
         bboxMax = range.GetMax()
 
-        # Find the top center of the bounding box and add a small offset upward.
         x_Pos = (bboxMin[0] + bboxMax[0]) * 0.5
         y_Pos = bboxMax[1] + 5
         z_Pos = (bboxMin[2] + bboxMax[2]) * 0.5
         position = [x_Pos, y_Pos, z_Pos]
         return position
+        
+    # def get_as_floats(self, item):
+    #     if item == self.position:
+    #         return self.get_position()
+    #     if item:
+    #         return item.value
+
+    #     return []
+
     
     def notice_changed(self, notice: Usd.Notice, stage: Usd.Stage) -> None:
         """Called by Tf.Notice.  Used when the current selected object changes in some way."""
