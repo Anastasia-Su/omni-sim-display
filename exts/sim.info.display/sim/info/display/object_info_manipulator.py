@@ -5,20 +5,19 @@ from .context_storage import selected_prims
 
 
 class ObjInfoManipulator(sc.Manipulator):
-
     def on_build(self):
 
         if not self.model:
             return
-        
+
         if self.model.get_item("name") == "":
             return
-        
+
         stage = self.model.usd_context.get_stage()
 
         if not stage:
             return
-        
+
         if len(selected_prims):
             print("selprims", selected_prims)
 
@@ -29,7 +28,9 @@ class ObjInfoManipulator(sc.Manipulator):
                     # Get the position of the current prim
                     position = self.model.get_position_for_prim(prim)
 
-                    with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
+                    with sc.Transform(
+                        transform=sc.Matrix44.get_translation_matrix(*position)
+                    ):
                         with sc.Transform(scale_to=sc.Space.SCREEN):
                             sc.Label(f"Path: {prim.GetPath().pathString}")
         else:

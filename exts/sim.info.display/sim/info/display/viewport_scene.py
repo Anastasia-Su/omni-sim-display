@@ -4,8 +4,10 @@ import omni.ui as ui
 from .object_info_manipulator import ObjInfoManipulator
 from .object_info_model import ObjInfoModel
 
-class ViewportSceneInfo():
+
+class ViewportSceneInfo:
     """The Object Info Manipulator, placed into a Viewport"""
+
     def __init__(self, viewport_window, ext_id) -> None:
         self.scene_view = None
         self.viewport_window = viewport_window
@@ -18,6 +20,7 @@ class ViewportSceneInfo():
             # Add the manipulator into the SceneView's scene
             with self.scene_view.scene:
                 ObjInfoManipulator(model=ObjInfoModel())
+
             # Register the SceneView with the Viewport to get projection and view updates
             self.viewport_window.viewport_api.add_scene_view(self.scene_view)
 
