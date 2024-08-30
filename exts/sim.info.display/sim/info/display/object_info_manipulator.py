@@ -78,21 +78,22 @@ class ObjInfoManipulator(sc.Manipulator):
             return
         # print("selected prims", self.selected_prims)
 
-        for prim_path in self.selected_prims:
-            for prim in stage.GetPrimAtPath(prim_path):
-                # print("prm",prim)
-                if prim.IsA(UsdGeom.Imageable) and not prim.GetPath().pathString in (
-                    '/World', '/Environment/ground', '/Environment'
-                ):
-                    position = self.model.get_position_for_prim(prim)
+        if len(selected_prims):
+            for prim_path in selected_prims:
+                for prim in stage.GetPrimAtPath(prim_path):
+                    # print("prm",prim)
+                    if prim.IsA(UsdGeom.Imageable) and not prim.GetPath().pathString in (
+                        '/World', '/Environment/ground', '/Environment'
+                    ):
+                        position = self.model.get_position_for_prim(prim)
 
-                    with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
-                        with sc.Transform(scale_to=sc.Space.SCREEN):
-                            sc.Label(f"Path: {prim.GetPath().pathString}")
+                        with sc.Transform(transform=sc.Matrix44.get_translation_matrix(*position)):
+                            with sc.Transform(scale_to=sc.Space.SCREEN):
+                                sc.Label(f"Path: {prim.GetPath().pathString}")
 
     def add_selected_prim(self, prim_path):
         """Adds a prim path to the list of selected prims."""
-        if prim_path not in self.selected_prims:
+        if prim_path not in selected_prims:
             selected_prims.append(prim_path)
             print(f"Added prim path: {prim_path}")
         else:

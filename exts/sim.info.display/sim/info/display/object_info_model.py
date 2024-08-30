@@ -174,8 +174,8 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         self.manipulator = manipulator
 
     def on_stage_event(self, event):
-        manipulator = ObjInfoManipulator()
-        print(f"Manipulator selected prims: {manipulator.selected_prims}")
+        # manipulator = ObjInfoManipulator()
+        # print(f"Manipulator selected prims: {manipulator.selected_prims}")
         if event.type == int(omni.usd.StageEventType.SELECTION_CHANGED):
 
             prim_path = self.usd_context.get_selection().get_selected_prim_paths()
