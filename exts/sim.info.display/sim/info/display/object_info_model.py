@@ -4,7 +4,6 @@ from pxr import UsdGeom
 
 from omni.ui import scene as sc
 import omni.usd
-from .context_storage import selected_prims
 
 
 class ObjInfoModel(sc.AbstractManipulatorModel):
@@ -31,7 +30,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         self.position = ObjInfoModel.PositionItem()
         self.usd_context = omni.usd.get_context()
 
-        # Track selection changes
         self.events = self.usd_context.get_stage_event_stream()
         self.stage_event_delegate = self.events.create_subscription_to_pop(
             self.on_stage_event, name="Object Info Selection Update"
@@ -40,18 +38,15 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
     def on_stage_event(self, event):
         if event.type == int(omni.usd.StageEventType.SELECTION_CHANGED):
 
-            prim_path = self.usd_context.get_selection().get_selected_prim_paths()
+            prim_paths = self.usd_context.get_selection().get_selected_prim_paths()
 
-            if not prim_path:
+            if not prim_paths:
                 self.current_path = ""
                 self._item_changed(self.position)
                 return
 
-            if prim_path[0] not in selected_prims:
-                selected_prims.append(prim_path[0])
-
             stage = self.usd_context.get_stage()
-            prim = stage.GetPrimAtPath(prim_path[0])
+            prim = stage.GetPrimAtPath(prim_paths[0])
 
             if not prim.IsA(UsdGeom.Imageable):
                 self.prim = None
@@ -66,13 +61,12 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
                 )
 
             self.prim = prim
-            self.current_path = prim_path[0]
+            self.current_path = prim_paths[0]
 
-            # Position is changed because new selected object has a different position
             self._item_changed(self.position)
 
     def get_item(self, identifier):
-        if identifier == 'name':
+        if identifier == "name":
             return self.current_path
 
         elif identifier == "position":
@@ -86,7 +80,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         prim = stage.GetPrimAtPath(self.current_path)
         return self.get_position_for_prim(prim)
 
-    # New method to get position for any given prim
     def get_position_for_prim(self, prim):
         """Returns position of the given prim"""
         stage = self.usd_context.get_stage()

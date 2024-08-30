@@ -1,12 +1,14 @@
 from omni.ui import scene as sc
-import omni.ui as ui
 from pxr import UsdGeom
-from .context_storage import selected_prims
+import omni.usd
 
 
 class ObjInfoManipulator(sc.Manipulator):
-    def on_build(self):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.usd_context = omni.usd.get_context()
 
+    def on_build(self):
         if not self.model:
             return
 
@@ -18,23 +20,22 @@ class ObjInfoManipulator(sc.Manipulator):
         if not stage:
             return
 
-        if len(selected_prims):
-            print("selprims", selected_prims)
+        prim_paths_selected = self.usd_context.get_selection().get_selected_prim_paths()
+        print("Selected prims", prim_paths_selected)
 
-            for prim_path in selected_prims:
-                prim = stage.GetPrimAtPath(prim_path)
+        
+        for prim_path in prim_paths_selected:
+            prim = stage.GetPrimAtPath(prim_path)
 
-                if prim.IsA(UsdGeom.Imageable):
-                    # Get the position of the current prim
-                    position = self.model.get_position_for_prim(prim)
+            if prim.IsA(UsdGeom.Imageable):
+                position = self.model.get_position_for_prim(prim)
 
-                    with sc.Transform(
-                        transform=sc.Matrix44.get_translation_matrix(*position)
-                    ):
-                        with sc.Transform(scale_to=sc.Space.SCREEN):
-                            sc.Label(f"Path: {prim.GetPath().pathString}")
-        else:
-            print("No selected")
+                with sc.Transform(
+                    transform=sc.Matrix44.get_translation_matrix(*position)
+                ):
+                    with sc.Transform(scale_to=sc.Space.SCREEN):
+                        sc.Label(f"Path: {prim.GetPath().pathString}")
+
 
     def on_model_updated(self, item):
         self.invalidate()
