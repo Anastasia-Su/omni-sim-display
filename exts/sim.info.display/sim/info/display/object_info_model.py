@@ -4,6 +4,7 @@ from pxr import UsdGeom
 
 from omni.ui import scene as sc
 import omni.usd
+from .context_storage import selected_prims
 
 
 class ObjInfoModel(sc.AbstractManipulatorModel):
@@ -33,7 +34,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         # Track selection changes
         self.events = self.usd_context.get_stage_event_stream()
         self.stage_event_delegate = self.events.create_subscription_to_pop(
-            self.on_stage_event, name="Object Info Selection Update"
+            self.on_stage_event, name='Object Info Selection Update'
         )
 
     def on_stage_event(self, event):
@@ -46,7 +47,10 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
                 self._item_changed(self.position)
                 return
             
+            selected_prims.append(prim_path[0])
+            
             stage = self.usd_context.get_stage()
+
             prim = stage.GetPrimAtPath(prim_path[0])
 
             if not prim.IsA(UsdGeom.Imageable):
@@ -98,14 +102,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         z_Pos = (bboxMin[2] + bboxMax[2]) * 0.5
         position = [x_Pos, y_Pos, z_Pos]
         return position
-        
-    # def get_as_floats(self, item):
-    #     if item == self.position:
-    #         return self.get_position()
-    #     if item:
-    #         return item.value
-
-    #     return []
 
     
     def notice_changed(self, notice: Usd.Notice, stage: Usd.Stage) -> None:
