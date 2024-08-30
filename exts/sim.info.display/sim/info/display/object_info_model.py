@@ -47,7 +47,8 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
                 self._item_changed(self.position)
                 return
 
-            selected_prims.append(prim_path[0])
+            if prim_path[0] not in selected_prims:
+                selected_prims.append(prim_path[0])
 
             stage = self.usd_context.get_stage()
             prim = stage.GetPrimAtPath(prim_path[0])

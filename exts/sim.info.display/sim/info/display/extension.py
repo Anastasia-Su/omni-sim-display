@@ -31,19 +31,23 @@ class SimInfoDisplayExtension(omni.ext.IExt):
                 )
 
     def on_click(self):
-        print("Clicked")
-        # usd_context = omni.usd.get_context()
+        # print("Clicked!")
 
-        # # Get the current selection
-        # selection = usd_context.get_selection()
 
-        # # Get the selected prim paths
-        # sel_prims = selection.get_selected_prim_paths()
 
-        # # Print the paths of selected prims
-        # for prim_path in sel_prims:
-        #     print("selpr_ext",sel_prims)
-        #     # print("Selected Prim Path:", prim_path)
-        #     if prim_path in selected_prims:
-        #         selected_prims.remove(prim_path)
-        #         print("final_sel_pr", selected_prims)
+
+        usd_context = omni.usd.get_context()
+
+        # Get the current selection
+        selection = usd_context.get_selection()
+
+        # Get the selected prim paths
+        sel_prims = selection.get_selected_prim_paths()
+
+        # Print the paths of selected prims
+        for prim_path in sel_prims:
+            print("selpr_ext",sel_prims)
+            # print("Selected Prim Path:", prim_path)
+            if prim_path in selected_prims:
+                selected_prims.remove(prim_path)
+                print("final_sel_pr", selected_prims)
