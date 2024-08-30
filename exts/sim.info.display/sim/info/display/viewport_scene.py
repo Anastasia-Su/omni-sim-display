@@ -10,15 +10,18 @@ class ViewportSceneInfo():
         self.scene_view = None
         self.viewport_window = viewport_window
 
-        # Create a unique frame for our SceneView
+
         with self.viewport_window.get_frame(ext_id):
-            # Create a default SceneView (it has a default camera-model)
             self.scene_view = sc.SceneView()
 
             # Add the manipulator into the SceneView's scene
             with self.scene_view.scene:
-                ObjInfoManipulator(model=ObjInfoModel())
-            # Register the SceneView with the Viewport to get projection and view updates
+                obj_manipulator = ObjInfoManipulator()
+                # ObjInfoManipulator(model=ObjInfoModel(manipulator=obj_manipulator))
+                obj_info_model = ObjInfoModel(manipulator=obj_manipulator) 
+                obj_manipulator.model = obj_info_model  
+                print(f"Manipulator assigned to model: {obj_info_model.manipulator}") 
+           
             self.viewport_window.viewport_api.add_scene_view(self.scene_view)
 
     def __del__(self):
@@ -26,11 +29,9 @@ class ViewportSceneInfo():
 
     def destroy(self):
         if self.scene_view:
-            # Empty the SceneView of any elements it may have
             self.scene_view.scene.clear()
-            # un-register the SceneView from Viewport updates
             if self.viewport_window:
                 self.viewport_window.viewport_api.remove_scene_view(self.scene_view)
-        # Remove our references to these objects
+       
         self.viewport_window = None
         self.scene_view = None
