@@ -1,0 +1,22 @@
+[
+    
+    {
+        "prim_name": "/World/Cube",
+        "version": 1.000,
+        "description": "This is a cube.",
+        "timestamp": "2024-09-02T12:00:00"
+            
+    },
+    {
+        "prim_name": "/World/Cone",
+        "version": 2.000,
+        "description": "This is a cone.",
+        "timestamp": "2024-09-02T12:00:00"
+    },
+    {
+        "prim_name": "/World/Scope/Sphere",
+        "version": 3.000,
+        "description": "This is a sphere.",
+        "timestamp": "2024-09-02T12:00:00"
+    }
+]

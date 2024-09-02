@@ -4,6 +4,8 @@ from pxr import UsdGeom
 
 from omni.ui import scene as sc
 import omni.usd
+import json
+import os
 
 
 class ObjInfoModel(sc.AbstractManipulatorModel):
@@ -35,9 +37,46 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
             self.on_stage_event, name="Object Info Selection Update"
         )
         self.all_prims = None
+        self.selected_children = None
+        self.custom_data = None
+
+    def _load_json_data(self):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, "custom_data.json")
+
+        with open(file_path) as json_data:
+            loaded_data = json.load(json_data)
+            
+        return loaded_data
+        # script_dir = os.path.dirname(os.path.abspath(__file__))
+        # file_path = os.path.join(script_dir, "custom_data.json")
+
+        # # Check if the file exists
+        # if not os.path.exists(file_path):
+        #     raise FileNotFoundError(f"File not found: {file_path}")
+
+        # # Read and load the JSON data
+        # try:
+        #     with open(file_path, 'r', encoding='utf-8') as json_file:
+        #         data = json.load(json_file)
+
+        #         # Ensure the data is a list of dictionaries
+        #         if not isinstance(data, list) or not all(isinstance(item, dict) for item in data):
+        #             raise ValueError("The JSON file must contain a list of dictionaries.")
+                
+        #         return data
+        
+        # except json.JSONDecodeError as e:
+        #     raise ValueError(f"Error decoding JSON: {e}")
+        # except Exception as e:
+        #     raise RuntimeError(f"An error occurred while loading JSON data: {e}")
+
 
     def on_stage_event(self, event):
         if event.type == int(omni.usd.StageEventType.SELECTION_CHANGED):
+
+            # if self.custom_data is None:
+            #     self.custom_data = self._load_json_data()
 
             self.all_prims = self.usd_context.get_selection().get_selected_prim_paths()
 
@@ -50,6 +89,12 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
             for prim_path in self.all_prims:
                 prim = stage.GetPrimAtPath(prim_path)
+
+                if prim.GetTypeName() == "Scope":
+                    self.selected_children = prim.GetAllChildren()
+                    
+                    self.select_prims(prim.GetAllChildren())
+                    print("scoped", self.selected_children)
 
                 if not prim.IsA(UsdGeom.Imageable):
                     self.prim = None
@@ -67,6 +112,27 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
                 self.current_path = prim_path
 
                 self._item_changed(self.position)
+
+                # if self.custom_data is None:
+                #     self.custom_data = self._load_json_data()
+
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                file_path = os.path.join(script_dir, "custom_data.json")
+
+                with open(file_path) as json_data:
+                    loaded_data = json.load(json_data)
+
+                print("ldata", loaded_data)
+
+                
+                for data_object in loaded_data:
+                    if prim_path in data_object.values():
+                        prim.SetCustomData(data_object)
+                        print("meta",prim.GetCustomData())
+
+
+            
+
 
     def get_item(self, identifier):
         if identifier == "name":
@@ -102,6 +168,21 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         z_Pos = (bboxMin[2] + bboxMax[2]) * 0.5
         position = [x_Pos, y_Pos, z_Pos]
         return position
+    
+    def select_prims(self, prims):
+        """Selects all prims given a list of prim objects."""
+        # Convert prim objects to their paths
+        prim_paths = [prim.GetPath().pathString for prim in prims]
+        selection = self.usd_context.get_selection()
+        selection.set_selected_prim_paths(prim_paths, False)
+    
+    # def get_all_child_prims(self, parent_prim):
+    #     """Recursively get all child prims under a given parent prim."""
+    #     child_prims = []
+    #     for child in parent_prim.GetAllChildren():
+    #         child_prims.append(child.GetPath().pathString)
+    #         child_prims.extend(self.get_all_child_prims(child))
+    #     return child_prims
 
     def notice_changed(self, notice: Usd.Notice, stage: Usd.Stage) -> None:
         """Called by Tf.Notice.  Used when the current selected object changes in some way."""
