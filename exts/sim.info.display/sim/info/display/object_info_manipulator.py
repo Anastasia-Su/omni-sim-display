@@ -20,11 +20,11 @@ class ObjInfoManipulator(sc.Manipulator):
         if not stage:
             return
 
-        prim_paths_selected = self.usd_context.get_selection().get_selected_prim_paths()
-        print("Selected prims", prim_paths_selected)
+        all_prims = self.model.get_item("all_prims")
+        print("Selected prims", all_prims)
 
         
-        for prim_path in prim_paths_selected:
+        for prim_path in all_prims:
             prim = stage.GetPrimAtPath(prim_path)
 
             if prim.IsA(UsdGeom.Imageable):

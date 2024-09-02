@@ -34,36 +34,39 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         self.stage_event_delegate = self.events.create_subscription_to_pop(
             self.on_stage_event, name="Object Info Selection Update"
         )
+        self.all_prims = None
 
     def on_stage_event(self, event):
         if event.type == int(omni.usd.StageEventType.SELECTION_CHANGED):
 
-            prim_paths = self.usd_context.get_selection().get_selected_prim_paths()
+            self.all_prims = self.usd_context.get_selection().get_selected_prim_paths()
 
-            if not prim_paths:
+            if not self.all_prims:
                 self.current_path = ""
                 self._item_changed(self.position)
                 return
 
             stage = self.usd_context.get_stage()
-            prim = stage.GetPrimAtPath(prim_paths[0])
 
-            if not prim.IsA(UsdGeom.Imageable):
-                self.prim = None
-                if self.stage_listener:
-                    self.stage_listener.Revoke()
-                    self.stage_listener = None
-                return
+            for prim_path in self.all_prims:
+                prim = stage.GetPrimAtPath(prim_path)
 
-            if not self.stage_listener:
-                self.stage_listener = Tf.Notice.Register(
-                    Usd.Notice.ObjectsChanged, self.notice_changed, stage
-                )
+                if not prim.IsA(UsdGeom.Imageable):
+                    self.prim = None
+                    if self.stage_listener:
+                        self.stage_listener.Revoke()
+                        self.stage_listener = None
+                    return
 
-            self.prim = prim
-            self.current_path = prim_paths[0]
+                if not self.stage_listener:
+                    self.stage_listener = Tf.Notice.Register(
+                        Usd.Notice.ObjectsChanged, self.notice_changed, stage
+                    )
 
-            self._item_changed(self.position)
+                self.prim = prim
+                self.current_path = prim_path
+
+                self._item_changed(self.position)
 
     def get_item(self, identifier):
         if identifier == "name":
@@ -71,6 +74,9 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
         elif identifier == "position":
             return self.position
+        
+        elif identifier == "all_prims":
+            return self.all_prims
 
     def get_position(self):
         stage = self.usd_context.get_stage()
@@ -82,9 +88,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
     def get_position_for_prim(self, prim):
         """Returns position of the given prim"""
-        stage = self.usd_context.get_stage()
-        if not stage or not prim:
-            return [0, 0, 0]
 
         box_cache = UsdGeom.BBoxCache(
             Usd.TimeCode.Default(), includedPurposes=[UsdGeom.Tokens.default_]
@@ -102,6 +105,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
     def notice_changed(self, notice: Usd.Notice, stage: Usd.Stage) -> None:
         """Called by Tf.Notice.  Used when the current selected object changes in some way."""
+
         for p in notice.GetChangedInfoOnlyPaths():
             if self.current_path in str(p.GetPrimPath()):
                 self._item_changed(self.position)
