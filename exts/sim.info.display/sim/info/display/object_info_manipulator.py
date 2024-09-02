@@ -21,17 +21,6 @@ class ObjInfoManipulator(sc.Manipulator):
             return
 
         all_prims = self.model.get_item("all_prims")
-        print("Selected prims", all_prims)
-
-        
-
-
-
-        # script_dir = os.path.dirname(os.path.abspath(__file__))
-        # file_path = os.path.join(script_dir, "custom_data.json")
-        # with open(file_path) as json_data:
-        #     j_data = json.load(json_data)
-
 
         for prim_path in all_prims:
             prim = stage.GetPrimAtPath(prim_path)
@@ -43,13 +32,14 @@ class ObjInfoManipulator(sc.Manipulator):
                     transform=sc.Matrix44.get_translation_matrix(*position)
                 ):
                     with sc.Transform(scale_to=sc.Space.SCREEN):
-                        # for data_object in j_data:
                         if prim.GetCustomData():
-                            formatted_data = "\n".join(f"{key}: {value}" for key, value in prim.GetCustomData().items())
+                            formatted_data = "\n".join(
+                                f"{key}: {value}"
+                                for key, value in prim.GetCustomData().items()
+                            )
                             sc.Label(f"{formatted_data}")
                         else:
                             sc.Label(f"No meta found for this prim")
-
 
     def on_model_updated(self, item):
         self.invalidate()

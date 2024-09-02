@@ -1,22 +1,28 @@
 [
     
     {
-        "prim_name": "/World/Cube",
-        "version": 1.000,
+        "prim_name": "/World/Scope/Cube",
+        "version": 1.0,
         "description": "This is a cube.",
         "timestamp": "2024-09-02T12:00:00"
             
     },
     {
-        "prim_name": "/World/Cone",
-        "version": 2.000,
+        "prim_name": "/World/Scope/Cone",
+        "version": 2.0,
         "description": "This is a cone.",
         "timestamp": "2024-09-02T12:00:00"
     },
     {
         "prim_name": "/World/Scope/Sphere",
-        "version": 3.000,
+        "version": 3.0,
         "description": "This is a sphere.",
+        "timestamp": "2024-09-02T12:00:00"
+    },
+    {
+        "prim_name": "/World/Cylinder",
+        "version": 4.0,
+        "description": "This is a cylinder.",
         "timestamp": "2024-09-02T12:00:00"
     }
 ]
