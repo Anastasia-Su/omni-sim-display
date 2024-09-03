@@ -2,12 +2,13 @@ from omni.ui import scene as sc
 
 from .object_info_manipulator import ObjInfoManipulator
 from .object_info_model import ObjInfoModel
+from .widget_info_manipulator import WidgetInfoManipulator
 
 
 class ViewportSceneInfo:
     """The Object Info Manipulator, placed into a Viewport"""
 
-    def __init__(self, viewport_window, ext_id) -> None:
+    def __init__(self, viewport_window, ext_id, display_widget) -> None:
         self.scene_view = None
         self.viewport_window = viewport_window
 
@@ -15,7 +16,11 @@ class ViewportSceneInfo:
             self.scene_view = sc.SceneView()
 
             with self.scene_view.scene:
-                ObjInfoManipulator(model=ObjInfoModel())
+                if display_widget:
+                    WidgetInfoManipulator(model=ObjInfoModel())
+
+                else:
+                    ObjInfoManipulator(model=ObjInfoModel())
 
             self.viewport_window.viewport_api.add_scene_view(self.scene_view)
 

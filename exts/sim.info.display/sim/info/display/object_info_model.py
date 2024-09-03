@@ -37,7 +37,6 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
             self.on_stage_event, name="Object Info Selection Update"
         )
         self.all_prims = None
-        # self.selected_children = None
         self.custom_data = self._load_json_data()
 
     @staticmethod
