@@ -37,7 +37,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
             self.on_stage_event, name="Object Info Selection Update"
         )
         self.all_prims = None
-        self.custom_data = self._load_json_data()
+        # self.custom_data = self._load_json_data()
 
     @staticmethod
     def _load_json_data():
@@ -85,11 +85,12 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
                 self._item_changed(self.position)
 
                 # Setting metadata based on prim path
-                if self.custom_data:
-                    for data_object in self.custom_data:
-                        if prim_path in data_object.values():
-                            prim.SetCustomData(data_object)
-                print("Meta", prim.GetCustomData())
+                custom_data = self._load_json_data()
+                # if self.custom_data:
+                for data_object in custom_data:
+                    if prim_path in data_object.values():
+                        prim.SetCustomData(data_object)
+            print("Meta", prim.GetCustomData())
 
     def get_item(self, identifier):
         if identifier == "name":
@@ -129,7 +130,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
     def select_all_children(self, prims):
         """Selects all prims given a list of prim objects."""
-        # Convert prim objects to their paths
+        
         prim_paths = [prim.GetPath().pathString for prim in prims]
         selection = self.usd_context.get_selection()
         selection.set_selected_prim_paths(prim_paths, False)
