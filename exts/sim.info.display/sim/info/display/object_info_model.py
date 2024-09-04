@@ -102,17 +102,13 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         elif identifier == "all_prims":
             return self.all_prims
 
-    def get_position(self):
+    
+    def get_position_for_prim(self, prim):
+        """Returns position of the given prim"""
+
         stage = self.usd_context.get_stage()
         if not stage or self.current_path == "":
             return [0, 0, 0]
-
-        prim = stage.GetPrimAtPath(self.current_path)
-        return self.get_position_for_prim(prim)
-
-    @staticmethod
-    def get_position_for_prim(prim):
-        """Returns position of the given prim"""
 
         box_cache = UsdGeom.BBoxCache(
             Usd.TimeCode.Default(), includedPurposes=[UsdGeom.Tokens.default_]

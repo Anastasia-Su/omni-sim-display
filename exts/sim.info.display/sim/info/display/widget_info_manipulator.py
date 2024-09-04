@@ -9,14 +9,26 @@ class WidgetInfoManipulator(sc.Manipulator):
         super().__init__(**kwargs)
         self.usd_context = omni.usd.get_context()
         self.widgets = []
+
+        self.widget_pool = [] 
+        self.active_widgets = [] 
+        # self._root = sc.Transform()
+
         self._root = None
+        # self._name_label = None
         self.destroy()
 
     def destroy(self):
         self._root = None
+        # self._name_label = None
 
-    @staticmethod
-    def on_build_widgets(prim):
+    
+    def on_build_widgets(self, prim, widget):
+        self.destroy()
+
+        with widget.frame:
+            widget.frame.clear()
+
         custom_style = {"font_size": 25, "margin": 20}
 
         with ui.ZStack():
@@ -34,20 +46,22 @@ class WidgetInfoManipulator(sc.Manipulator):
                     formatted_data = "\n".join(
                         f"{key}: {value}" for key, value in prim.GetCustomData().items()
                     )
-                    ui.Label(
+                    self._name_label = ui.Label(
                         formatted_data,
                         height=0,
                         alignment=ui.Alignment.LEFT,
                         style=custom_style,
                     )
                 else:
-                    ui.Label(
+                    self._name_label = ui.Label(
                         "No meta found for this prim",
                         style=custom_style,
                     )
 
     def on_build(self):
-        self.widgets.clear()
+        # self.on_model_updated(None)
+        # self.destroy()
+        # self.widgets.clear()
 
         if not self.model:
             return
@@ -80,12 +94,12 @@ class WidgetInfoManipulator(sc.Manipulator):
                             update_policy=sc.Widget.UpdatePolicy.ON_MOUSE_HOVERED,
                         )
                         widget.frame.set_build_fn(
-                            lambda prim=prim: WidgetInfoManipulator.on_build_widgets(
-                                prim
+                            lambda prim=prim, widget=widget: self.on_build_widgets(
+                                prim, widget
                             )
                         )
                         self.widgets.append(widget)
 
-    def on_model_updated(self, item):
+    def on_model_updated(self, _):
         self.invalidate()
-        self.destroy()
+        # self.destroy()
